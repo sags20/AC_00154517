@@ -9,8 +9,8 @@
 
 iterar:
         CMP AX, 23d
-        JE exit
-        ADD AX,AX
+        JE Prom
+        ADD AX, AX
         ADD AX, 1d
         ADD AX, 5d
         ADD AX, 4d
@@ -18,7 +18,13 @@ iterar:
         ADD AX, 1d
         ADD AX, 7d
         jmp iterar
-        
+
+Prom:
+        CMP AX, 3d
+        JBE exit
+        MOV BX,8d
+        DIV BX
+        MOV [20Ah],AX
 
 exit:
         int 20h
