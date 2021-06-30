@@ -1,4 +1,4 @@
-	;NOTA: codigo base el brindado como ejempo para el labo 6
+	;NOTA: el codigo base es el brindado como ejemplo para el labo 6
 	org 	100h
 
 	section	.text
@@ -23,7 +23,7 @@ writePass db "Password: ", "$"
 wPass db "INCORRECTO ", "$"
 rPass db "BIENVENIDO ", "$"
 size times 5 db	" " 
-myPassword db "drako"
+myPassword db "drako$"
 
 ;Funciones
 key:
@@ -45,33 +45,25 @@ while:
         call key  
         cmp AL, 0x0D        
         je exit            
-        mov [BP+SI], AL   	
-        inc SI              
+        mov [BP+SI], AL   	            
         jmp compareString  
 
 ;comparando las contraseñas
 compareString:
         xor SI,SI
-
         mov BH, [SI + size]   
         mov BL, [SI + myPassword]   
         INC SI 
         cmp BH, BL  
-
-		jnp wrong 
-        je right 
+		je right 
+		jne wrong 
         jmp while
 
 ;contraseña incorrecta
 wrong:
-        xor DI,DI
-        inc DI		
-        jmp while
-
-		cmp DI,0
-		MOV DX, wPass          
-        call writeString
-        call key 
+		xor DX, DX
+		mov DX, wPass
+		jmp while
 
 ;Contraseña correcta
 right:       
