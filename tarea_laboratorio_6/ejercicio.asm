@@ -1,66 +1,86 @@
-; GUARDAR UNA CADENA EN UN VARIABLE Y ESCRIBIRLA EN LA CONSOLA DE MS-DOS
-; MAIN
+	;NOTA: codigo base el brindado como ejempo para el labo 6
 	org 	100h
 
 	section	.text
 
-	; print msg1
-	mov 	DX, msg1
-	call  	EscribirCadena
+	;Pedir contraseña
+	mov 	DX, writePass
+	call  	writeString
 
-	; input frase
-	mov 	BP, frase
-	call  	LeerCadena
+	;Input contraseña
+	mov 	BP, size
+	call  	readString
 
-	; print msg2
-	mov 	DX, msg2
-	call 	EscribirCadena
-
-	; print frase
-	mov 	DX, frase
-	call 	EscribirCadena
-
-	call	EsperarTecla
+    ;Llamada a las funciones
+	call 	writeString
+	call	key
 
 	int 	20h
 
+;Textos y datos a usar
 	section	.data
+writePass db "Password: ", "$"
+wPass db "INCORRECTO ", "$"
+rPass db "BIENVENIDO ", "$"
+size times 5 db	" " 
+myPassword db "drako"
 
-msg1	db	"Ingresa una frase: ", "$"
-msg2 	db 	"Frase ingresada: ", "$"
-frase 	times 	20  	db	" " 	
-
-; FUNCIONES
-
-; Permite leer un carácter de la entrada estándar con echo
-; Parámetros:   AH: 07h         
-; Salida:       AL: caracter ASCII leído
-EsperarTecla:
+;Funciones
+key:
         mov     AH, 01h         
         int     21h
         ret
 
-
-; Leer cadena de texto desde el teclado
-; Salida:       SI: longitud de la cadena 		BP: direccion de guardado
-LeerCadena:
-        xor     SI, SI          ; SI = 0
-while:  
-        call    EsperarTecla    ; retorna un caracter en AL
-        cmp     AL, 0x0D        ; comparar AL con caracter EnterKey
-        je      exit            ; si AL == EnterKey, saltar a exit
-        mov     [BP+SI], AL   	; guardar caracter en memoria
-        inc     SI              ; SI++
-        jmp     while           ; saltar a while
-exit:
-	mov 	byte [BP+SI], "$"	; agregar $ al final de la cadena
-        ret
-
-
 ; Permite escribir en la salida estándar una cadena de caracteres o string, este
 ; debe tener como terminación el carácter “$”
-; Parámetros:	AH: 09h 	DX: dirección de la celda de memoria inicial de la cadena
-EscribirCadena:
+writeString:
 	mov 	AH, 09h
 	int 	21h
 	ret
+
+; Leer cadena de texto desde el teclado
+readString:
+        xor SI, SI         
+while:  
+        call key  
+        cmp AL, 0x0D        
+        je exit            
+        mov [BP+SI], AL   	
+        inc SI              
+        jmp compareString  
+
+;comparando las contraseñas
+compareString:
+        xor SI,SI
+
+        mov BH, [SI + size]   
+        mov BL, [SI + myPassword]   
+        INC SI 
+        cmp BH, BL  
+
+		jnp wrong 
+        je right 
+        jmp while
+
+;contraseña incorrecta
+wrong:
+        xor DI,DI
+        inc DI		
+        jmp while
+
+		cmp DI,0
+		MOV DX, wPass          
+        call writeString
+        call key 
+
+;Contraseña correcta
+right:       
+        xor DX, DX
+		mov DX, rPass
+		jmp while
+
+exit:
+        mov byte [BP+SI], "$"	
+        ret
+
+
